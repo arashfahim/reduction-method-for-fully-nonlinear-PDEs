@@ -7,15 +7,20 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 import time
 from IPython.display import display, Markdown
 
-import neuralnets.Ynet as Ynet
-import neuralnets.Znet as Znet
-import neuralnets.Ytnet as Ytnet
-import samplepaths.data_gen as data_gen
+import equation as eqn
+# from neuralnets import Ynet
+# from neuralnets import Znet
+# from neuralnets import Ytnet
+# from samplepaths import data_gen
 import coeff as cf
-import functions
+# import functions
 import equation as eqn
 
 from absl import app
+
+
+
+           
 
 def main(argv):
     del argv

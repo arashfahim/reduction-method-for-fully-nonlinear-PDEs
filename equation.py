@@ -7,20 +7,79 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 import time
 from IPython.display import display, Markdown
 
-import neuralnets.Ynet as Ynet
-import neuralnets.Znet as Znet
-import neuralnets.Ytnet as Ytnet
-import samplepaths.data_gen as data_gen
+# import neuralnets.Ynet as Ynet
+# import neuralnets.Znet as Znet
+# import neuralnets.Ytnet as Ytnet
+# import samplepaths.data_gen as data_gen
 import coeff
 import functions
+from samplepaths import data_gen
+ 
 
-# from mpl_toolkits.mplot3d import Axes3D
 
+# Solution at t=0
+class Ynet(nn.Module): #input [M,D+1]   #output [M,1]
+    def __init__(self,pde,sim):
+        super(Ynet, self).__init__()
+        dim = pde['dim']
+        num_neurons = sim['num_neurons']
+        self.linear_stack = nn.Sequential(
+            nn.Linear(dim, num_neurons),
+            # nn.BatchNorm1d(num_features=8),# We should never use Batch mormalization in these type of problems when the input and scale back to a smaller region. The input is normalized with a different scale than the training data and out functions are going to be screwed.
+            nn.Tanh(),
+            nn.Linear(num_neurons, num_neurons),
+            # nn.BatchNorm1d(num_features=8),
+            nn.Tanh(),
+            nn.Linear(num_neurons,1),
+        )
+    def forward(self, x):
+        logits = self.linear_stack(x)
+        return logits  
+    
+    
+# derivative of the solution at all times
+class Znet(nn.Module): #input [M,D+1]   #output [M,1]
+    def __init__(self,pde,sim):
+        dim = pde['dim']
+        num_neurons = sim['num_neurons']
+        super(Znet, self).__init__()
+        self.linear_stack = nn.Sequential(
+            nn.Linear(dim+1, num_neurons),
+            nn.Tanh(),
+            nn.Linear(num_neurons, num_neurons),
+            # nn.BatchNorm1d(num_features=20),
+            nn.Tanh(),
+            nn.Linear(num_neurons,dim),
+        )
+    def forward(self, x):
+        logits = self.linear_stack(x)
+        return logits#.reshape([dim,dim])  
+    
+    
+# Value of the solution at all times
+class Ytnet(nn.Module): #input [M,D+1]   #output [M,1]
+    def __init__(self,pde,sim):
+        dim = pde['dim']
+        num_neurons = sim['num_neurons']
+        super(Ytnet, self).__init__()
+        self.linear_stack = nn.Sequential(
+            nn.Linear(dim+1, num_neurons),
+            # nn.BatchNorm1d(num_features=8),
+            nn.Tanh(),
+            nn.Linear(num_neurons, num_neurons),
+            # nn.BatchNorm1d(num_features=8),
+            nn.Tanh(),
+            nn.Linear(num_neurons,1),
+        )
+    def forward(self, x):
+        logits = self.linear_stack(x)
+        return logits    
+    
 class linear(object):
     def __init__(self,sigma,mu,source,kappa,terminal,pde,sim):        
-        self.Y0 = Ynet() # NN for value at t=0 
-        self.Z = Znet() # NN for gradient at all times
-        self.Yt = Ytnet() # NN for value function at all times, required to update sigma
+        self.Y0 = Ynet(pde,sim) # NN for value at t=0 
+        self.Z = Znet(pde,sim) # NN for gradient at all times
+        self.Yt = Ytnet(pde,sim) # NN for value function at all times, required to update sigma
         self.terminal = terminal # terminal condition
         self.loss_epoch = [] # list to keep the loss at each training epoch
         self.epoch=0 # initializing epoch to zero

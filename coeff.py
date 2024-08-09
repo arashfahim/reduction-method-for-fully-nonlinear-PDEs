@@ -111,6 +111,19 @@ class OU_drift_lin(coefficient):
             output[:,i] = self.kappa[i]*(self.theta[i] - x[:,i])
         return output 
     
+'''Drift of semilinear eqn: first component drift=0, others are OU'''
+class OU_drift_semi(coefficient):
+    def __init__(self,params):
+        super(OU_drift_semi, self).__init__(params)
+    def __call__(self,x):
+        num_samples = x.shape[0]
+        output = torch.zeros(num_samples,self.dim)
+        for i in range(0,self.dim):
+            output[:,i] = self.kappa[i]*(self.theta[i] - x[:,i])
+        return output
+ 
+     
+    
     
 class custom_drift(coefficient):
     def __init__(self, params,s,sigma):
