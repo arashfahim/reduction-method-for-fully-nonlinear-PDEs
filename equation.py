@@ -1,16 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import torch
 import torch.nn as nn
 import torch.optim as optim
+torch.set_default_dtype(torch.float64)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 import time
 from IPython.display import display, Markdown
 
+import neuralnets.Ynet as Ynet
+import neuralnets.Znet as Znet
+import neuralnets.Ytnet as Ytnet
+import samplepaths.data_gen as data_gen
+import coeff
+import functions
+
 # from mpl_toolkits.mplot3d import Axes3D
-mpl.rcParams['legend.fontsize'] = 10
-torch.set_default_dtype(torch.float64)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class linear(object):
     def __init__(self,sigma,mu,source,kappa,terminal,pde,sim):        
