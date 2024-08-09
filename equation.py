@@ -14,6 +14,7 @@ from IPython.display import display, Markdown
 import coeff
 import functions
 from samplepaths import data_gen
+import copy
  
 
 
@@ -104,6 +105,7 @@ class linear(object):
         self.r = self.r.clone().detach()
         self.c = self.c.clone().detach()
         self.trained = False
+        self.params = {**copy.deepcopy(pde),**copy.deepcopy(sim)}
         
     def loss(self):
         # self.Zsigmadw = torch.zeros((num_samples,1,n)).to(device)
@@ -134,9 +136,17 @@ class linear(object):
                 print("At epoch {}, mean loss is {:.2E}.".format(self.epoch+1,loss.detach()))
                 self.time_display(t_0, t_1)
             self.epoch += 1
-        print("Training took {} epochs and {:,} ms and the final loss is {:.2E}.".format(self.epoch,round(1000*(time.time()-t_0),2),loss))
+        t_delta = time.time()-t_0
+        print("Training took {} epochs and {:,} ms and the final loss is {:.2E}.".format(self.epoch,round(1000*(t_delta),2),loss))
         self.trained = True
         self.value_fnc(lr=1e-2,delta_loss=delta_loss,max_num_epochs=1000,num_batches=10)
+        self.params['Y0'] = self.Y0
+        self.params['Z'] = self.Z
+        self.params['value'] = self.Yt
+        self.params['training_time'] = t_delta
+        self.params['loss'] = self.loss_epoch
+        self.params['max_epochs'] = self.epoch
+        
 
     def time_display(self, t_0, t_1):
         print("Training this epoch takes {:,} ms. So far: {:,} ms in training.".format(round(1000*(time.time()-t_1),2),round(1000*(time.time()-t_0),2)))

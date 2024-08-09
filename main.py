@@ -15,8 +15,11 @@ import equation as eqn
 import coeff as cf
 # import functions
 import equation as eqn
+import visuals
 
 from absl import app
+import pickle as pk
+import os
 
 
 
@@ -66,6 +69,19 @@ def main(argv):
     heat = eqn.linear(sigma,mu,f,k,g,pde_params,sim_params)
     
     heat.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
+    
+    heat.value_fnc(lr=1e-2,delta_loss=1e-9,max_num_epochs=1000,num_batches=10)
+    
+    alpha = 0.5*torch.pow(off_diff*pde_params['eta'],2)
+    sol_lin = cf.exp_solution(pde_params, alpha)
+    visuals.display_it(heat,closed_form=sol_lin);
+    
+    path = os.getcwd()
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    file_name = "saved_results/"+timestr+".pickle"
+    with open(os.path.join(path,file_name)) as file:
+        pk.dump(heat, file, annotate_fields=True, include_attributes=False)
+        
 
 if __name__ == '__main__':
     app.run(main)    

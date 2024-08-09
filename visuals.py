@@ -77,6 +77,7 @@ class display_it(object):
                     sol = kwargs['closed_form']
                     v_c = sol(tdata).detach().squeeze(-1)
                     print("The $L^2$ distance between the fitted value function at time {:.2f} and closed-form is  {:.3E}.".format(t,pow(v_c-v_t,2).mean()))
+                    eqn.params['L2_fit_cf'] = [t,pow(v_c-v_t,2).mean()]
             else:
                 v_0 = eqn.Y0(data).detach().squeeze(-1)        
                 tdata = torch.cat((torch.zeros(data.shape[0],1),data),axis=1)
@@ -86,6 +87,9 @@ class display_it(object):
                     v_c = sol(tdata).detach().squeeze(-1)              
                     print("The $L^2$ distance between the fitted value function at time 0 and closed-form is  {:.3E}.".format(pow(v_c-v_t,2).mean()))
                     print("The $L^2$ distance between the approximated value function at time 0 and closed-form for optimal $\sigma$  is  {:.3E}.".format(pow(v_c-v_0,2).mean()))
+                eqn.params['L2_fit_cf'] = [0.0,pow(v_c-v_t,2).mean()]
+                eqn.params['L2_v0_cf'] = [0.0,pow(v_c-v_0,2).mean()]
+                    
                
 
         
