@@ -76,11 +76,12 @@ def main(argv):
     sol_lin = cf.exp_solution(pde_params, alpha)
     visuals.display_it(heat,closed_form=sol_lin);
     
-    path = os.getcwd()
+    path = os.path.join(os.getcwd(),"saved_results")
+    print(path)
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    file_name = "saved_results/"+timestr+".pickle"
-    with open(os.path.join(path,file_name)) as file:
-        pk.dump(heat, file, annotate_fields=True, include_attributes=False)
+    file_name = timestr+".pickle"
+    with open(os.path.join(path,file_name),'wb') as file:
+        pk.dump(heat, file)
         
 
 if __name__ == '__main__':
