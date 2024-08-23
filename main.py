@@ -58,8 +58,8 @@ def main(argv):
           }
     
     
-    num_ite = 15
-    bounds = [np.minimum(1e-1,0.8/n) for n in range(1,num_ite)]# bounds
+    num_ite = 20
+    bounds = [np.minimum(1e-1,0.5/n) for n in range(1,num_ite)]# bounds
     
     path = os.path.dirname(__file__)
     
