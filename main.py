@@ -59,7 +59,7 @@ def main(argv):
     
     
     num_ite = 20
-    bounds = [np.minimum(1e-1,0.25/n) for n in range(1,num_ite)]# bounds
+    bounds = [1e-1 for n in range(1,int(num_ite/2))] + [n0.25/n for n in range(int(num_ite/2),num_ite+1)]# bounds
     
     path = os.path.dirname(__file__)
     
@@ -163,7 +163,7 @@ def main(argv):
     print(output_dict[1])
 
 
-    for j in range(2,num_ite):
+    for j in range(2,num_ite+1):
         semi_diff = semi_diff + ell
         semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
         print("semi "+str(j))
