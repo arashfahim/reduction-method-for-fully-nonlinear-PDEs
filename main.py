@@ -6,7 +6,7 @@ torch.set_default_dtype(torch.float64)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 import time
-from IPython.display import display, Markdown
+# from IPython.display import display, Markdown
 
 import equation as eqn
 # from neuralnets import Ynet
