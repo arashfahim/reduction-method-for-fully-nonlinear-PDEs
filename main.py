@@ -16,7 +16,7 @@ import equation as eqn
 import coeff as cf
 # import functions
 import equation as eqn
-import visuals
+# import visuals
 import time
 
 from absl import app
@@ -59,7 +59,7 @@ def main(argv):
     
     
     num_ite = 20
-    bounds = [np.minimum(1e-1,0.5/n) for n in range(1,num_ite)]# bounds
+    bounds = [np.minimum(1e-1,0.25/n) for n in range(1,num_ite)]# bounds
     
     path = os.path.dirname(__file__)
     
