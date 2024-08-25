@@ -31,7 +31,7 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':2,
+    pde_params={'dim':5,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01], #Hung's params
