@@ -87,6 +87,8 @@ def main(argv):
 
     output_dict['optimal'] = (m.lb_norm/m.eta).item()
     
+    output_dict['bounds'] = bounds
+    
     
     semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
 

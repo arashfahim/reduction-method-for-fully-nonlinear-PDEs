@@ -61,3 +61,22 @@ class Ytnet(nn.Module): #input [M,D+1]   #output [M,1]
         logits = self.linear_stack(x)
         return logits    
            
+           
+# Value of updated sigma
+class sigmanet(nn.Module): #input [M,D+1]   #output [M,1]
+    def __init__(self,pde,sim):
+        dim = pde['dim']
+        num_neurons = sim['num_neurons']
+        super(Ytnet, self).__init__()
+        self.linear_stack = nn.Sequential(
+            nn.Linear(dim+1, num_neurons),
+            # nn.BatchNorm1d(num_features=8),
+            nn.Tanh(),
+            nn.Linear(num_neurons, num_neurons),
+            # nn.BatchNorm1d(num_features=8),
+            nn.Tanh(),
+            nn.Linear(num_neurons,1),
+        )
+    def forward(self, x):
+        logits = self.linear_stack(x)
+        return logits               
