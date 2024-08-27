@@ -67,7 +67,7 @@ class sigmanet(nn.Module): #input [M,D+1]   #output [M,1]
     def __init__(self,pde,sim):
         dim = pde['dim']
         num_neurons = sim['num_neurons']
-        super(Ytnet, self).__init__()
+        super(sigmanet, self).__init__()
         self.linear_stack = nn.Sequential(
             nn.Linear(dim+1, num_neurons),
             # nn.BatchNorm1d(num_features=8),

@@ -12,7 +12,8 @@ import equation as eqn
 # from neuralnets import Ynet
 # from neuralnets import Znet
 # from neuralnets import Ytnet
-# from samplepaths import data_gen
+from samplepaths import data_gen
+import sigma_update as su # type: ignore
 import coeff as cf
 # import functions
 import equation as eqn
@@ -31,7 +32,7 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':3,
+    pde_params={'dim':2,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
@@ -49,12 +50,12 @@ def main(argv):
     size = num_samples* max_dim * num_time_intervals
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
-    sim_params={'num_samples':3*2**12,
+    sim_params={'num_samples':2**10,
             'num_time_intervals': 10,
             'iid':iid,
             'start' : 0.0,  
             'end' : 1.0,
-            'num_neurons':6
+            'num_neurons':4
             }
     
     
@@ -142,7 +143,14 @@ def main(argv):
             json.dump(output_dict, outfile) 
             
             
-        semi_diff = semi_diff + ell
+        diff_tmp = semi_diff + ell
+        semi = eqn.semilinear(diff_tmp,m,F,k,g,pde_params,sim_params)
+        
+        new_sigma = su.sigma_update(pde_params,sim_params,semi.x,semi_diff)
+        new_sigma.train()
+        
+        semi_diff = cf.custom_diff(pde_params,new_sigma)
+        
         sigma = semi_diff
         for i in range(sim_params['num_time_intervals']):
             if i == 0:
@@ -166,8 +174,8 @@ def main(argv):
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
-
         
+          
 
 if __name__ == '__main__':
-    app.run(main)    
+    app.run(main)            

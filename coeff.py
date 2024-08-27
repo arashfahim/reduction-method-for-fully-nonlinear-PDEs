@@ -61,6 +61,7 @@ class custom_diff(coefficient):
         num_samples = x.shape[0]
         A=torch.zeros(num_samples,dim,dim)
         A[:,1:,1:] = torch.diag(self.nu)
+        # print(A[:,0,0].shape,self.val(x).shape)
         A[:,0,0] = self.val(x)
         return A
     def __add__(self, other):

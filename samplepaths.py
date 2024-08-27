@@ -13,7 +13,7 @@ class data_gen(object):
         self.n = sim['num_time_intervals']
         self.dim = pde['dim']
         self.dt = torch.tensor([pde['T']/self.n]).to(device)
-        self.dw = iid[0:self.num_samples*self.dim*n].reshape([self.num_samples,self.dim,self.n]).to(device)* torch.sqrt(self.dt)#you can make randomness a universal variable if 
+        self.dw = iid[0:self.num_samples*self.dim*self.n].view(self.num_samples,self.dim,self.n).to(device)* torch.sqrt(self.dt)#you can make randomness a universal variable if 
         self.x = torch.zeros((self.num_samples,self.dim+1,self.n+1))
         
         
