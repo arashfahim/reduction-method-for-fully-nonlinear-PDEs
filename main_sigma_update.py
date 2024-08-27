@@ -32,7 +32,7 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':10,
+    pde_params={'dim':3,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
@@ -50,17 +50,17 @@ def main(argv):
     size = num_samples* max_dim * num_time_intervals
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
-    sim_params={'num_samples':2**14,
+    sim_params={'num_samples':2**12,
             'num_time_intervals': 10,
             'iid':iid,
             'start' : 0.0,  
             'end' : 1.0,
-            'num_neurons':6
+            'num_neurons':4
             }
     
     
     num_ite = 10
-    bounds = [1. for n in range(num_ite+1)]# bounds
+    bounds = [.5 for n in range(num_ite+1)]# bounds
     
     path = os.path.dirname(__file__)
     
@@ -79,7 +79,7 @@ def main(argv):
                                     }
 
     m = cf.OU_drift_semi(pde_params)
-    rand_diff = torch.tensor([1.7])
+    rand_diff = torch.tensor([1.])
     semi_diff = cf.custom_diff(pde_params,rand_diff)
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
@@ -164,11 +164,12 @@ def main(argv):
                                 'std':t[:,0,0].std().clone().detach().numpy().item()
                                 }
         print(output_dict[j])
-
-        semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
         print("semi "+str(j+1))
         
+        
+        
         if j < num_ite:
+            semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
             semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
             
             ell = cf.direction(pde_params,semi.Yt,semi_diff, bound = bounds[j-1])
