@@ -32,7 +32,7 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':3,
+    pde_params={'dim':10,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
@@ -55,7 +55,7 @@ def main(argv):
             'iid':iid,
             'start' : 0.0,  
             'end' : 1.0,
-            'num_neurons':4
+            'num_neurons':5
             }
     
     
@@ -79,7 +79,7 @@ def main(argv):
                                     }
 
     m = cf.OU_drift_semi(pde_params)
-    rand_diff = torch.tensor([1.])
+    rand_diff = torch.tensor([2.])
     semi_diff = cf.custom_diff(pde_params,rand_diff)
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
