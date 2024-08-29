@@ -21,7 +21,7 @@ import equation as eqn
 import time
 
 from absl import app # type: ignore
-import pickle as pk
+# import pickle as pk
 import os
 import json
 
@@ -32,7 +32,7 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':10,
+    pde_params={'dim':3,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
@@ -127,9 +127,9 @@ def main(argv):
     
         for i in range(sim_params['num_time_intervals']):
             if i == 0:
-                t = ell(semi.x[:,:,i]).squeeze(-1)
+                t = torch.abs(ell(semi.x[:,:,i])).squeeze(-1)
             else:
-                t = torch.cat((t,ell(semi.x[:,:,i]).squeeze(-1)),axis=0)
+                t = torch.cat((t,torch.abs(ell(semi.x[:,:,i])).squeeze(-1)),axis=0)
         output_dict[j] = {}
         output_dict[j]['ell'] = {'min':t[:,0,0].min().clone().detach().numpy().item(),
                                 'mean':t[:,0,0].mean().clone().detach().numpy().item(),
