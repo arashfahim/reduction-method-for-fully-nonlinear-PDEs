@@ -32,11 +32,11 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':3,
+    pde_params={'dim':2,
                 'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
                 'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
                 # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
-                'nu':[0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1],# we do not like vanishing diffusion coefficient
+                'nu':[0.0, 0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1],# we do not like vanishing diffusion coefficient
                 # 'lb':[0.,0.15,0.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15],  # Hung's params
                 'lb':[0.,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # New params Make closed form solution more sensitive to time
                 'rho':[0.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
@@ -45,17 +45,17 @@ def main(argv):
         }
     t0 = time.time()
     num_samples = 2**14
-    num_time_intervals = 10
+    num_time_intervals = 20
     max_dim = 10
     size = num_samples* max_dim * num_time_intervals
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
-    sim_params={'num_samples':2**12,
-            'num_time_intervals': 10,
+    sim_params={'num_samples':2**9,
+            'num_time_intervals': 20,
             'iid':iid,
             'start' : 0.0,  
             'end' : 1.0,
-            'num_neurons':5
+            'num_neurons':4
             }
     
     
@@ -65,7 +65,7 @@ def main(argv):
     path = os.path.dirname(__file__)
     
     timestr = time.strftime("%Y%m%d-%H%M")
-    file = os.path.join(path,"iterations_1e-1_ell_only_"+timestr)
+    file = os.path.join(path,"ite_"+str(pde_params['dim'])+"_"+str(bounds[0])+"_"+timestr)
     output_dict = {}
     
     output_dict['pde'] = pde_params
@@ -83,7 +83,7 @@ def main(argv):
     semi_diff = cf.custom_diff(pde_params,rand_diff)
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
-    F = cf.f_driver(pde_params)
+    F = cf.f_driver(pde_params, ChesneyScott = False)
     
 
     output_dict['optimal'] = (m.lb_norm/m.eta).item()

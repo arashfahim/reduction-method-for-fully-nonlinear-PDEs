@@ -126,11 +126,11 @@ class semilinear(parabolic):
                 Y =  self.Y0(self.x[:,1:,0])
             else:
                 Z = Grad(self.x[:,:,i-1],self.Yt)[:,1:,:].view(-1,1,self.dim)                    
-                c[:,:,i-1] = self.F(Z,self.sigmax[:,0,0,i-1]).unsqueeze(-1)
+                c[:,:,i-1] = self.F(self.x[:,:,i-1],Z,self.sigmax[:,:,:,i-1]).unsqueeze(-1)
                 Y = Y*self.r[:,:,i] + c[:,:,i-1]*self.dt + torch.bmm(Z,self.sigmadw[:,:,i-1].unsqueeze(2)).squeeze(2)
                 if i == self.n - 1:
                     Z = Grad(self.x[:,:,i],self.Yt)[:,1:,:].view(-1,1,self.dim)                    
-                    c[:,:,i] = self.F(Z,self.sigmax[:,0,0,i]).unsqueeze(-1)
+                    c[:,:,i] = self.F(self.x[:,:,i],Z,self.sigmax[:,:,:,i]).unsqueeze(-1)
                     Y = Y*self.r[:,:,i] + c[:,:,i]*self.dt + torch.bmm(Z,self.sigmadw[:,:,i].unsqueeze(2)).squeeze(2)
                     c[:,:,i+1] = self.terminal(self.x[:,1:,i+1])
         L1 = torch.pow(c[:,:,-1]-Y,2)

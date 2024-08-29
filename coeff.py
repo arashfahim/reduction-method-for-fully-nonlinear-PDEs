@@ -9,11 +9,11 @@ def Frobenius(A,B):
 
 
 
-'''Implements the coefficeints based on the parameters '''
+'''Implements the coefficients based on the parameters '''
 class coefficient(object):
     def __init__(self,params): #### out_shape =([M]) |  input:  x_shape=[M,D,1],  z shape = [M,D,1],a_shape= [M,D,D]  #This is for rho=0
         self.dim = torch.tensor(params['dim']).to(device)#2
-        self.nu = torch.tensor(params['nu'][0:self.dim-1]).to(device)
+        self.nu = torch.tensor(params['nu'][0:self.dim]).to(device)
         self.kappa = torch.tensor(params['kappa'][0:self.dim]).to(device)
         self.theta = torch.tensor(params['theta'][0:self.dim]).to(device)
         self.eta = torch.tensor(params['eta']).to(device)
@@ -21,7 +21,7 @@ class coefficient(object):
         self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
         self.params = params
     
-'''constant diffution coefficient'''  
+'''constant diffusion coefficient'''  
 class constant_diff(coefficient):
     '''This class is a constant diffusion coefficient which is the optimal diffusion'''
     def __init__(self,params,**kwargs):
@@ -35,7 +35,7 @@ class constant_diff(coefficient):
             self.diff = torch.sqrt(torch.pow(self.lb,2).sum())/self.eta
     def __call__(self,x):
         tmp = x.shape[0]
-        return torch.diag(torch.cat((self.diff,self.nu[0:self.dim-1]),axis=0)).repeat(tmp,1,1)
+        return torch.diag(torch.cat((self.diff,self.nu[1:]),axis=0)).repeat(tmp,1,1)
 
 '''Random diffusion coefficient for wealth process with diffusion of volatility processes all constant'''   
 class random_diff(coefficient):
@@ -43,7 +43,7 @@ class random_diff(coefficient):
         super(random_diff, self).__init__(params)
     def __call__(self,x):
         tmp = x.shape[0]
-        return torch.diag(torch.cat((torch.rand(tmp,1),self.nu[0:self.dim-1].repeat(tmp,1)),axis=0))
+        return torch.diag(torch.cat((torch.rand(tmp,1),self.nu[1:].repeat(tmp,1)),axis=0))
     
 
     
@@ -60,7 +60,7 @@ class custom_diff(coefficient):
         dim = self.dim
         num_samples = x.shape[0]
         A=torch.zeros(num_samples,dim,dim)
-        A[:,1:,1:] = torch.diag(self.nu)
+        A[:,1:,1:] = torch.diag(self.nu[:,1:])
         # print(A[:,0,0].shape,self.val(x).shape)
         A[:,0,0] = self.val(x)
         return A
@@ -203,13 +203,25 @@ class zero_discount(coefficient):
         return torch.zeros(x.shape[0],1)     
     
 '''Driver for a semilinear'''               
-class f_driver(coefficient):
-    def __init__(self,params): #### out_shape =([M]) |  input:  x_shape=[M,D,1],  z shape = [M,D,1],a_shape= [M,D,D]  #This is for rho=0
-        super(f_driver, self).__init__(params)
-    def __call__(self,z,a):
-        return -torch.sqrt(torch.sum(torch.square(self.lb)))*torch.abs(z[:,0,0])*torch.abs(a)# + output
+# class f_driver(coefficient):
+#     def __init__(self,params): 
+#         super(f_driver, self).__init__(params)
+#     def __call__(self,x,z,a):
+#         return -self.lb_norm*torch.abs(z[:,0,0])*torch.abs(a)# + output
         
-    
+'''Driver with linear Chesney-Scott dependence on vol for a semilinear'''               
+class f_driver(coefficient):
+    def __init__(self,params,**kwargs): 
+        if 'ChesneyScott' in kwargs:
+            tmp = float(kwargs['ChesneyScott'])
+            self.lbv_norm = lambda x:tmp*torch.sqrt(torch.sum(torch.square(self.lb*x[:,2:])))+(1-tmp)*self.lb_norm
+        else:
+            self.lbv_norm = lambda x: self.lb_norm
+        super(f_driver, self).__init__(params)
+    def __call__(self,x,z,a):
+        return -self.lbv_norm(x)*torch.abs(z[:,0,0])*torch.abs(a[:,0,0])
+        
+        
 '''Adding two coefficients together'''
 class add_coeff(coefficient):
     def __init__(self,s1,s2):
@@ -234,39 +246,39 @@ class zero_terminal(coefficient):
         return torch.zeros(num_samples,1)
     
     
-class solution(object):
-    def __init__(self,params):
-        self.dim = torch.tensor(params['dim']).to(device)#2
-        self.nu = torch.tensor(params['nu'][0:self.dim-1]).to(device)
-        self.kappa = torch.tensor(params['kappa'][0:self.dim]).to(device)
-        self.theta = torch.tensor(params['theta'][0:self.dim]).to(device)
-        self.eta = torch.tensor(params['eta']).to(device)
-        self.lb = torch.tensor(params['lb'][0:self.dim]).to(device)
-        self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
-        self.T = params['T']
+# class solution(object):
+#     def __init__(self,params):
+#         self.dim = torch.tensor(params['dim']).to(device)#2
+#         self.nu = torch.tensor(params['nu'][0:self.dim]).to(device)
+#         self.kappa = torch.tensor(params['kappa'][0:self.dim]).to(device)
+#         self.theta = torch.tensor(params['theta'][0:self.dim]).to(device)
+#         self.eta = torch.tensor(params['eta']).to(device)
+#         self.lb = torch.tensor(params['lb'][0:self.dim]).to(device)
+#         self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
+#         self.T = params['T']
         
         
-class exp_solution(solution):
-    def __init__(self,params,alpha):
-        self.alpha = alpha
-        super(exp_solution, self).__init__(params)
-    def __call__(self,x):
-        # print(self.alpha)
-        return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.alpha*(self.T-x[:,0])).to(device)     
+# class exp_solution(solution):
+#     def __init__(self,params,alpha):
+#         self.alpha = alpha
+#         super(exp_solution, self).__init__(params)
+#     def __call__(self,x):
+#         # print(self.alpha)
+#         return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.alpha*(self.T-x[:,0])).to(device)     
 
-class zero_solution(solution):
-    def __init__(self,params):
-        super(zero_solution, self).__init__(params)
-    def __call__(self,x):
-        # print(self.alpha)
-        return torch.zeros([x.shape[0],1]).to(device) 
+# class zero_solution(solution):
+#     def __init__(self,params):
+#         super(zero_solution, self).__init__(params)
+#     def __call__(self,x):
+#         # print(self.alpha)
+#         return torch.zeros([x.shape[0],1]).to(device) 
     
-class time_solution(solution):
-    def __init__(self,params,constant):
-        self.constant = constant
-        super(time_solution, self).__init__(params)
-    def __call__(self,x):
-        return (self.T-x[:,0].unsqueeze(-1))*self.constant*torch.ones([x.shape[0],1]).to(device)        
+# class time_solution(solution):
+#     def __init__(self,params,constant):
+#         self.constant = constant
+#         super(time_solution, self).__init__(params)
+#     def __call__(self,x):
+#         return (self.T-x[:,0].unsqueeze(-1))*self.constant*torch.ones([x.shape[0],1]).to(device)        
     
     
     
