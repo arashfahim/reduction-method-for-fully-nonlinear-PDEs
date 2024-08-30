@@ -39,76 +39,26 @@ class time_solution(solution):
     
 class ChesneyScott(solution):
     def __init__(self, params):
-        self.hk = torch.sqrt(torch.power(self.kappa,2)+ torch.power(self.nu*self.lb,2))
         super(ChesneyScott,self).__init__(params)   
+        self.hk = torch.sqrt(torch.pow(self.kappa,2)+ torch.pow(self.nu*self.lb,2))
+
     def auxillary(self,i,t):
         khk = self.kappa[i]/self.hk[i]
         sinh = torch.sinh(self.hk[i]*t)
         cosh = torch.cosh(self.hk[i]*t)
-        denom = self.hk[i]*cosh + self.kappa[i]*sinh
-        return torch.cat((torch.power(self.lb[i],2)*sinh/denom,  torch.power(self.lb[i],2)*khk*self.theta[i]*(cosh-1)/denom,  .5*torch.ln(cosh+khk*sinh) - .5*self.kappa[i]*t -  torch.power(self.lb[i]*khk*self.theta[i],2)*(sinh/denom -t + khk*(cosh-1)/denom),axis=-1)
+        term0 = cosh + khk*sinh
+        denom = self.hk[i]*term0
+        term1 = khk*(cosh-1)/denom
+        term2 = sinh/denom
+        phi = torch.pow(self.lb[i],2)*term2
+        psi = torch.pow(self.lb[i],2)*self.theta[i]*term1
+        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + term1)
+        return phi,  psi, chi
     def wtv(self,x):
         tmp = 0
         for i in range(1,self.dim):
-            tmp = tmp -0.5*self.phi(i+1,self.T-x[:,0])*torch.power(x[:,i+1],2) - self.psi(i+1,self.T-x[:,0])* x[:,i+1] - self.chi(i+1,self.T-x[:,0])    
+            phi, psi, chi = self.auxillary(i,self.T-x[:,0])
+            tmp = tmp -0.5*phi*torch.pow(x[:,i+1],2) - psi* x[:,i+1] - chi
         return torch.exp(tmp)
     def __call__(self,x):
-        # print(self.alpha)
         return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.wtv(x)).to(device)     
-
-# class Ynet(nn.Module): #input [M,D+1]   #output [M,1]
-#     def __init__(self,pde,sim):
-#         super(Ynet, self).__init__()
-#         dim = pde['dim']
-#         num_neurons = sim['num_neurons']
-#         self.linear_stack = nn.Sequential(
-#             nn.Linear(dim, num_neurons),
-#             # nn.BatchNorm1d(num_features=8),# We should never use Batch normalization in these type of problems when the input and scale back to a smaller region. The input is normalized with a different scale than the training data and out functions are going to be screwed.
-#             nn.Tanh(),
-#             nn.Linear(num_neurons, num_neurons),
-#             # nn.BatchNorm1d(num_features=8),
-#             nn.Tanh(),
-#             nn.Linear(num_neurons,1),
-#         )
-#     def forward(self, x):
-#         logits = self.linear_stack(x)
-#         return logits  
-    
-    
-# # derivative of the solution at all times
-# class Znet(nn.Module): #input [M,D+1]   #output [M,1]
-#     def __init__(self,pde,sim):
-#         dim = pde['dim']
-#         num_neurons = sim['num_neurons']
-#         super(Znet, self).__init__()
-#         self.linear_stack = nn.Sequential(
-#             nn.Linear(dim+1, num_neurons),
-#             nn.Tanh(),
-#             nn.Linear(num_neurons, num_neurons),
-#             # nn.BatchNorm1d(num_features=20),
-#             nn.Tanh(),
-#             nn.Linear(num_neurons,dim),
-#         )
-#     def forward(self, x):
-#         logits = self.linear_stack(x)
-#         return logits#.reshape([dim,dim])  
-    
-    
-# # Value of the solution at all times
-# class Ytnet(nn.Module): #input [M,D+1]   #output [M,1]
-#     def __init__(self,pde,sim):
-#         dim = pde['dim']
-#         num_neurons = sim['num_neurons']
-#         super(Ytnet, self).__init__()
-#         self.linear_stack = nn.Sequential(
-#             nn.Linear(dim+1, num_neurons),
-#             # nn.BatchNorm1d(num_features=8),
-#             nn.Tanh(),
-#             nn.Linear(num_neurons, num_neurons),
-#             # nn.BatchNorm1d(num_features=8),
-#             nn.Tanh(),
-#             nn.Linear(num_neurons,1),
-#         )
-#     def forward(self, x):
-#         logits = self.linear_stack(x)
-#         return logits  

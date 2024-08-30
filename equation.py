@@ -12,7 +12,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # import coeff
 # import functions
-from functions import Ynet, Ytnet
+from neuralnets import Ynet, Ytnet
 from samplepaths import data_gen
 import copy
 from derivation import Grad

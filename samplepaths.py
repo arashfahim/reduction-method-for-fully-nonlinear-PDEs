@@ -6,8 +6,8 @@ class data_gen(object):
     def __init__(self,sigma,mu,pde,sim):
         self.mu = mu
         self.sigma = sigma
-        a = torch.tensor(sim['start']).to(device)
-        b = torch.tensor(sim['end']).to(device)
+        a = torch.tensor(sim['start']).clone().detach().to(device)
+        b = torch.tensor(sim['end']).clone().detach().to(device)
         iid = sim['iid']
         self.num_samples = sim['num_samples']
         self.n = sim['num_time_intervals']
