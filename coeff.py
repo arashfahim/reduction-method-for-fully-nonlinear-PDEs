@@ -12,12 +12,12 @@ def Frobenius(A,B):
 '''Implements the coefficients based on the parameters '''
 class coefficient(object):
     def __init__(self,params): #### out_shape =([M]) |  input:  x_shape=[M,D,1],  z shape = [M,D,1],a_shape= [M,D,D]  #This is for rho=0
-        self.dim = torch.tensor(params['dim']).to(device)#2
-        self.nu = torch.tensor(params['nu'][0:self.dim]).to(device)
-        self.kappa = torch.tensor(params['kappa'][0:self.dim]).to(device)
-        self.theta = torch.tensor(params['theta'][0:self.dim]).to(device)
-        self.eta = torch.tensor(params['eta']).to(device)
-        self.lb = torch.tensor(params['lb'][0:self.dim]).to(device)
+        self.dim = torch.tensor(params['dim']).clone().detach().to(device)#2
+        self.nu = torch.tensor(params['nu'][0:self.dim]).clone().detach().to(device)
+        self.kappa = torch.tensor(params['kappa'][0:self.dim]).clone().detach().to(device)
+        self.theta = torch.tensor(params['theta'][0:self.dim]).clone().detach().to(device)
+        self.eta = torch.tensor(params['eta']).clone().detach().to(device)
+        self.lb = torch.tensor(params['lb'][0:self.dim]).clone().detach().to(device)
         self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
         self.params = params
     
