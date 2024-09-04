@@ -52,13 +52,13 @@ class ChesneyScott(solution):
         term2 = sinh/denom
         phi = torch.pow(self.lb[i],2)*term2
         psi = torch.pow(self.lb[i],2)*self.theta[i]*term1
-        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + term1)
+        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + khk*term1)
         return phi,  psi, chi
     def wtv(self,x):
         tmp = 0
         for i in range(1,self.dim):
             phi, psi, chi = self.auxillary(i,self.T-x[:,0])
             tmp = tmp -0.5*phi*torch.pow(x[:,i+1],2) - psi* x[:,i+1] - chi
-        return torch.exp(tmp)
+        return tmp
     def __call__(self,x):
         return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.wtv(x)).to(device)     

@@ -101,7 +101,23 @@ class OU_drift_semi(coefficient):
         for i in range(0,self.dim):
             output[:,i] = self.kappa[i]*(self.theta[i] - x[:,i+1])
         return output
- 
+    
+    
+'''Drift of gradient linear eqn in Chesney-Scott model: first component drift=0, others are OU'''
+class OU_drift_lin_CS(coefficient):
+    def __init__(self,params,v,sigma):
+        self.p = v
+        self.sigma = sigma
+        super(OU_drift_lin, self).__init__(params)
+    def __call__(self,x):
+        num_samples = x.shape[0]
+        q = self.p(x)[:,0]
+        output = torch.zeros(num_samples,self.dim)
+        output[:,0] = torch.sqrt(torch.pow(self.lb*x[:,1:],2).sum(axis=1))*torch.sgn(q)*self.sigma(x)[:,0,0]
+        for i in range(1,self.dim):
+            output[:,i] = self.kappa[i]*(self.theta[i] - x[:,i+1])
+        return output 
+
     
 '''Drift of linear eqn: first component drift =|lb|*sgn(v_e)sigma_{00}(x), others are OU'''
     
@@ -171,7 +187,7 @@ class direction(coefficient):
                 self.Lb = lambda x: torch.sqrt(torch.pow(self.lb*x[:,1:],2).sum(axis=1))
             else:
                 self.CS = False
-                self.Lb = lambda x:  self.lb_norm
+                self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0],1)
                         
         super(direction, self).__init__(params)
     def val(self,x):
