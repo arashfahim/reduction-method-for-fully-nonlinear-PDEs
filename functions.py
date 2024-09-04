@@ -52,7 +52,7 @@ class ChesneyScott(solution):
         term2 = sinh/denom
         phi = torch.pow(self.lb[i],2)*term2
         psi = torch.pow(self.lb[i],2)*self.theta[i]*term1
-        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + khk*term1)
+        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + term1)
         return phi,  psi, chi
     def wtv(self,x):
         tmp = torch.zeros(x.shape[0])

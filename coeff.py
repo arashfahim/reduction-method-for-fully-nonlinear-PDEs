@@ -184,7 +184,7 @@ class direction(coefficient):
         if 'ChesneyScott' is kwargs:
             if kwargs['ChesneyScott']:
                 self.CS = True
-                self.Lb = lambda x: torch.sqrt(torch.pow(self.lb*x[:,1:],2).sum(axis=1))
+                self.Lb = lambda x: torch.pow(self.lb*x[:,1:],2).sum(axis=1)
             else:
                 self.CS = False
                 self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0],1)
