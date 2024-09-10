@@ -47,19 +47,22 @@ class ChesneyScott(solution):
         sinh = torch.sinh(self.hk[i]*t)
         cosh = torch.cosh(self.hk[i]*t)
         term0 = cosh + khk*sinh
+        # print(term0)
         denom = self.hk[i]*term0
-        term1 = khk*(cosh-1)/denom
+        term1 = (cosh-1)/denom
         term2 = sinh/denom
         phi = torch.pow(self.lb[i],2)*term2
-        psi = torch.pow(self.lb[i],2)*self.theta[i]*term1
-        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(term2 -t + term1)
+        psi = torch.pow(self.lb[i],2)*self.theta[i]*khk*term1
+        chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(0.5*(term2 -t) + khk*term1)
+        # print(.5*torch.log(term0) - .5*self.kappa[i]*t)
         return phi,  psi, chi
     def wtv(self,x):
+        # print(x[:,2])
         tmp = torch.zeros(x.shape[0])
         for i in range(1,self.dim):
             phi, psi, chi = self.auxillary(i,self.T-x[:,0])
             tmp = tmp -0.5*phi*torch.pow(x[:,i+1],2) - psi* x[:,i+1] - chi
-            print(tmp.shape,phi.shape,psi.shape,chi.shape)
+            # print(tmp,phi,psi,chi,-0.5*torch.pow(self.lb[i],2)*(self.T-x[:,0]))
         return tmp
     def __call__(self,x):
         return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.wtv(x)).to(device)     
