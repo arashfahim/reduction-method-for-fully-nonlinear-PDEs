@@ -5,7 +5,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 '''Class to create functions which take parameters from a dictionary'''
 class solution(object):
     def __init__(self,params):
-        self.dim=params['dim']#2
+        self.dim = params['dim']#2
         self.nu = params['nu'][0:self.dim]
         self.kappa = params['kappa'][0:self.dim]
         self.theta = params['theta'][0:self.dim]
@@ -40,7 +40,7 @@ class time_solution(solution):
 class ChesneyScott(solution):
     def __init__(self, params):
         super(ChesneyScott,self).__init__(params)   
-        self.hk = torch.sqrt(torch.pow(self.kappa,2)+ torch.pow(self.nu*self.lb,2))
+        self.hk = torch.sqrt(torch.pow(torch.tensor(self.kappa),2)+ torch.pow(torch.tensor(self.nu)*torch.tensor(self.lb),2))
 
     def auxillary(self,i,t):
         khk = self.kappa[i]/self.hk[i]
@@ -51,8 +51,8 @@ class ChesneyScott(solution):
         denom = self.hk[i]*term0
         term1 = (cosh-1)/denom
         term2 = sinh/denom
-        phi = torch.pow(self.lb[i],2)*term2
-        psi = torch.pow(self.lb[i],2)*self.theta[i]*khk*term1
+        phi = torch.pow(torch.tensor(self.lb[i]),2)*term2
+        psi = torch.pow(torch.tensor(self.lb[i]),2)*self.theta[i]*khk*term1
         chi = .5*torch.log(term0) - .5*self.kappa[i]*t -  torch.pow(self.lb[i]*khk*self.theta[i],2)*(0.5*(term2 -t) + khk*term1)
         # print(.5*torch.log(term0) - .5*self.kappa[i]*t)
         return phi,  psi, chi

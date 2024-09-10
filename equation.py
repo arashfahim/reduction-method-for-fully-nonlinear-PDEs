@@ -70,13 +70,13 @@ class parabolic(object):
                     self.time_display(t_0, t_1)
                 self.epoch += 1
             t_delta = time.time()-t_0
+            self.params['training_time'] = t_delta
             print(r'Training took {} epochs and {:,} ms and the final loss is {:.2E}.'.format(self.epoch,round(1000*(t_delta),2),loss))
         self.trained = True
         # self.value_fnc(lr=1e-2,delta_loss=delta_loss,max_num_epochs=1000,num_batches=10)
         self.params['Y0'] = self.Y0
         # self.params['Z'] = self.Z
         self.params['value'] = self.Yt
-        self.params['training_time'] = t_delta
         self.params['loss'] = self.loss_epoch
         self.params['max_epochs'] = self.epoch
         
@@ -109,7 +109,7 @@ class linear(parabolic):
         L1 = torch.pow(self.c[:,:,-1]-Y,2)
         L2 = torch.pow(self.Y0(self.x[:,1:,0])-self.Yt(self.x[:,:,0]),2)# Match with Y0
         L3 = torch.pow(self.c[:,:,-1]-self.Yt(self.x[:,:,-1]),2) # match with terminal
-        L = L1 + L2 + L3
+        L = L1 + 4*(L2 + L3)
         return L.mean()        
     
 class semilinear(parabolic):
@@ -139,5 +139,5 @@ class semilinear(parabolic):
         L1 = torch.pow(c[:,:,-1]-Y,2)
         L2 = torch.pow(self.Y0(self.x[:,1:,0])-self.Yt(self.x[:,:,0]),2)# Match with Y0
         L3 = torch.pow(c[:,:,-1]-self.Yt(self.x[:,:,-1]),2) # match with terminal
-        L = L1 + 2*L2 + 2*L3
+        L = L1 + 4*(L2 + L3)
         return L.mean()            
