@@ -18,6 +18,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class distance_to_optimal(object):
     def __init__(self,sigma,optimal_sigma,pde, sim):
+        self.sim = sim
         self.approx = sigma
         self.target = optimal_sigma
         step = pde['T']/sim['num_time_intervals']
@@ -36,8 +37,8 @@ class distance_to_optimal(object):
         
     def __call__(self,t,**kwargs):
         steps =100
-        x = torch.linspace(0.,1.,steps=steps)
-        y = torch.linspace(0.,1.,steps=steps)
+        x = torch.linspace(self.sim['start'].item(),self.sim['end'].item(),steps=steps)
+        y = torch.linspace(self.sim['start'].item(),self.sim['end'].item(),steps=steps)
         xy = torch.cartesian_prod(x,y)
         self.X, self.Y = torch.meshgrid(x, y, indexing='ij')
         txy = torch.cat((t*torch.ones(xy.shape[0],1),xy),axis=1)
@@ -89,8 +90,8 @@ class display_it(object):
             
             
             steps =100
-            x = torch.linspace(0.,1.,steps=steps)
-            y = torch.linspace(0.,1.,steps=steps)
+            x = torch.linspace(eqn.params['start'].item(),eqn.params['end'].item(),steps=steps)
+            y = torch.linspace(eqn.params['start'].item(),eqn.params['end'].item(),steps=steps)
             xy = torch.cartesian_prod(x,y)
             X, Y = torch.meshgrid(x, y, indexing='ij')
             v_T = eqn.terminal(xy).detach().reshape(steps,steps).squeeze(-1)
@@ -135,7 +136,7 @@ class display_it(object):
             # plt.show();
                 
         if kwargs:
-            data = torch.rand(2**14,eqn.dim)
+            data = eqn.params['start'].item()+(eqn.params['end'].item()-eqn.params['start'].item())*torch.rand(2**14,eqn.dim)
             if 't' in kwargs.keys():
                 t = kwargs['t']
                 tdata = torch.cat((t*torch.ones(data.shape[0],1),data),axis=1)

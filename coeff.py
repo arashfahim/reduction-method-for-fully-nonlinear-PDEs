@@ -233,7 +233,7 @@ class f_driver(coefficient):
     def __init__(self,params,**kwargs): 
         if 'ChesneyScott' in kwargs:
             tmp = float(kwargs['ChesneyScott'])
-            self.lbv_norm = lambda x:tmp*torch.sqrt(torch.sum(torch.square(self.lb*x[:,2:])))+(1-tmp)*self.lb_norm
+            self.lbv_norm = lambda x:tmp*torch.sqrt(torch.square(self.lb*x[:,1:]).sum(axis=1))+(1-tmp)*self.lb_norm
         else:
             self.lbv_norm = lambda x: self.lb_norm
         super(f_driver, self).__init__(params)

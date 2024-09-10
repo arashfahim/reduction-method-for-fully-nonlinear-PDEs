@@ -46,28 +46,31 @@ class parabolic(object):
         self.params = {**copy.deepcopy(pde),**copy.deepcopy(sim)} 
         
     def train(self,lr,delta_loss,max_num_epochs):
-        t_0 = time.time()
-        self.lr = lr
-        parameters = list(self.Y0.parameters()) + list(self.Yt.parameters())
-        optimizer = optim.Adam(parameters, self.lr)
-        L_ = -2.0
-        L = 2.0
-        while (np.abs(L_-L)>delta_loss) & (self.epoch < max_num_epochs):# epoch in range(num_epochs):
-            t_1 = time.time()
-            optimizer.zero_grad()
-            if self.epoch>0:
-                L_ = self.loss_epoch[self.epoch-1]
-            loss= self.loss()#self.cost(self.X,self.modelu(X))+ torch.mean(self.terminal(update(self.X,self.modelu(X))))#
-            loss.backward()
-            optimizer.step()
-            L = loss.clone().detach().numpy()
-            self.loss_epoch.append(L)
-            if (self.epoch % int(max_num_epochs/3)== int(max_num_epochs/3)-1) | (self.epoch == 0):
-                print('At epoch {}, mean loss is {:.2E}.'.format(self.epoch+1,L))
-                self.time_display(t_0, t_1)
-            self.epoch += 1
-        t_delta = time.time()-t_0
-        print(r'Training took {} epochs and {:,} ms and the final loss is {:.2E}.'.format(self.epoch,round(1000*(t_delta),2),loss))
+        if max_num_epochs <= self.epoch:
+            print("The maximum number of epochs, {}, is reached. Increase max_num_epochs and run again.".format(max_num_epochs))
+        else:
+            t_0 = time.time()
+            self.lr = lr
+            parameters = list(self.Y0.parameters()) + list(self.Yt.parameters())
+            optimizer = optim.Adam(parameters, self.lr)
+            L_ = -2.0
+            L = 2.0
+            while (np.abs(L_-L)>delta_loss) & (self.epoch < max_num_epochs):# epoch in range(num_epochs):
+                t_1 = time.time()
+                optimizer.zero_grad()
+                if self.epoch>0:
+                    L_ = self.loss_epoch[self.epoch-1]
+                loss= self.loss()#self.cost(self.X,self.modelu(X))+ torch.mean(self.terminal(update(self.X,self.modelu(X))))#
+                loss.backward()
+                optimizer.step()
+                L = loss.clone().detach().numpy()
+                self.loss_epoch.append(L)
+                if (self.epoch % int(max_num_epochs/3)== int(max_num_epochs/3)-1) | (self.epoch == 0):
+                    print('At epoch {}, mean loss is {:.2E}.'.format(self.epoch+1,L))
+                    self.time_display(t_0, t_1)
+                self.epoch += 1
+            t_delta = time.time()-t_0
+            print(r'Training took {} epochs and {:,} ms and the final loss is {:.2E}.'.format(self.epoch,round(1000*(t_delta),2),loss))
         self.trained = True
         # self.value_fnc(lr=1e-2,delta_loss=delta_loss,max_num_epochs=1000,num_batches=10)
         self.params['Y0'] = self.Y0
@@ -136,5 +139,5 @@ class semilinear(parabolic):
         L1 = torch.pow(c[:,:,-1]-Y,2)
         L2 = torch.pow(self.Y0(self.x[:,1:,0])-self.Yt(self.x[:,:,0]),2)# Match with Y0
         L3 = torch.pow(c[:,:,-1]-self.Yt(self.x[:,:,-1]),2) # match with terminal
-        L = L1 + L2 + L3
+        L = L1 + 2*L2 + 2*L3
         return L.mean()            
