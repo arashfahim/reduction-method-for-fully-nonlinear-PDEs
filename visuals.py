@@ -37,8 +37,8 @@ class distance_to_optimal(object):
         
     def __call__(self,t,**kwargs):
         steps =100
-        x = torch.linspace(self.sim['start'].item(),self.sim['end'].item(),steps=steps)
-        y = torch.linspace(self.sim['start'].item(),self.sim['end'].item(),steps=steps)
+        x = torch.linspace(self.sim['start'],self.sim['end'],steps=steps)
+        y = torch.linspace(self.sim['start'],self.sim['end'],steps=steps)
         xy = torch.cartesian_prod(x,y)
         self.X, self.Y = torch.meshgrid(x, y, indexing='ij')
         txy = torch.cat((t*torch.ones(xy.shape[0],1),xy),axis=1)
