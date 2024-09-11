@@ -187,7 +187,7 @@ class direction(coefficient):
                 self.Lb = lambda x: torch.pow(self.lb*x[:,1:],2).sum(axis=1)
         else:
             self.CS = False
-            self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0],1)
+            self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0])
                         
         super(direction, self).__init__(params)
     def val(self,x):
