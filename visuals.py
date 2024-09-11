@@ -136,7 +136,7 @@ class display_it(object):
             # plt.show();
                 
         if kwargs:
-            data = eqn.params['start'].item()+(eqn.params['end'].item()-eqn.params['start'].item())*torch.rand(2**14,eqn.dim)
+            data = eqn.params['start']+(eqn.params['end']-eqn.params['start'])*torch.rand(2**14,eqn.dim)
             if 't' in kwargs.keys():
                 t = kwargs['t']
                 tdata = torch.cat((t*torch.ones(data.shape[0],1),data),axis=1)
