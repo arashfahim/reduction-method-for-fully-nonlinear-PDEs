@@ -90,8 +90,8 @@ class display_it(object):
             
             
             steps =100
-            x = torch.linspace(eqn.params['start'].item(),eqn.params['end'].item(),steps=steps)
-            y = torch.linspace(eqn.params['start'].item(),eqn.params['end'].item(),steps=steps)
+            x = torch.linspace(eqn.params['start'],eqn.params['end'],steps=steps)
+            y = torch.linspace(eqn.params['start'],eqn.params['end'],steps=steps)
             xy = torch.cartesian_prod(x,y)
             X, Y = torch.meshgrid(x, y, indexing='ij')
             v_T = eqn.terminal(xy).detach().reshape(steps,steps).squeeze(-1)

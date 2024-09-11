@@ -221,12 +221,6 @@ class zero_discount(coefficient):
     def __call__(self,x):
         return torch.zeros(x.shape[0],1)     
     
-'''Driver for a semilinear'''               
-# class f_driver(coefficient):
-#     def __init__(self,params): 
-#         super(f_driver, self).__init__(params)
-#     def __call__(self,x,z,a):
-#         return -self.lb_norm*torch.abs(z[:,0,0])*torch.abs(a)# + output
         
 '''Driver with linear Chesney-Scott dependence on vol for a semilinear'''               
 class f_driver(coefficient):
@@ -239,6 +233,13 @@ class f_driver(coefficient):
         super(f_driver, self).__init__(params)
     def __call__(self,x,z,a):
         return -self.lbv_norm(x)*torch.abs(z[:,0,0])*torch.abs(a[:,0,0])
+    
+'''Driver for viscose Burger'''               
+class burger(coefficient):
+    def __init__(self,params,**kwargs): 
+        super(f_driver, self).__init__(params)
+    def __call__(self,x,z,y):
+        return y*(z.sum(axis=1))
         
         
 '''Adding two coefficients together'''
