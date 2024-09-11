@@ -31,17 +31,26 @@ import json
 
 def main(argv):
     del argv
-    pde_params={'dim':10,
-                'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
-                'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
-                # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
-                'nu':[0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1],# we do not like vanishing diffusion coefficient
-                # 'lb':[0.,0.15,0.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15],  # Hung's params
-                'lb':[0.,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # New params Make closed form solution more sensitive to time
-                'rho':[0.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-                'eta':1.,
-                'T': 1.,#torch.tensor([1.]).to(device),
-        }
+    # pde_params={'dim':10,
+    #             'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
+    #             'theta':[0.,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1,0.1,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
+    #             # 'nu':[0.02,0.015,0.11,0.12,0.01,0.013,0.14,0.14,0.01,], #Hung's params
+    #             'nu':[0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1],# we do not like vanishing diffusion coefficient
+    #             # 'lb':[0.,0.15,0.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15],  # Hung's params
+    #             'lb':[0.,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15,1.15,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # New params Make closed form solution more sensitive to time
+    #             'rho':[0.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+    #             'eta':1.,
+    #             'T': 1.,#torch.tensor([1.]).to(device),
+    #     }
+    pde_params={'dim':2,
+            'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
+            'theta':[0.,0.4,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
+            'nu':[0.,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1], # GPW
+            'lb':[0.,1.5,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # GPW
+            'rho':[0.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+            'eta':.5,
+            'T': 1.,
+            }
     t0 = time.time()
     num_samples = 2**12
     num_time_intervals = 10
@@ -59,7 +68,7 @@ def main(argv):
     
     
     num_ite = 10
-    bounds = [1. for n in range(num_ite+1)]# bounds
+    bound = 8.# bounds
     
     path = os.path.dirname(__file__)
     
@@ -77,9 +86,9 @@ def main(argv):
                                 'num_neurons': sim_params['num_neurons']
                                     }
 
-    m = cf.OU_drift_semi(pde_params)
+    m = cf.OU_drift_semi(pde_params) # type: ignore
     rand_diff = torch.tensor([1.7])
-    semi_diff = cf.custom_diff(pde_params,rand_diff)
+    semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
     F = cf.f_driver(pde_params)
@@ -87,10 +96,10 @@ def main(argv):
 
     output_dict['optimal'] = (m.lb_norm/m.eta).item()
     
-    output_dict['bounds'] = bounds
+    output_dict['bounds'] = bound
     
     
-    semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
+    semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params) # type: ignore
 
     
     sigma = semi_diff
@@ -104,7 +113,8 @@ def main(argv):
                             'mean':0.,
                             'median':0.,
                             'max':0.,
-                            'std':0.
+                            'std':0.,
+                            'bound':0.,
                             }
     output_dict[0]['sigma'] = {'min':t[:,0,0].min().clone().detach().numpy().item(),
                             'mean':t[:,0,0].mean().clone().detach().numpy().item(),
@@ -122,7 +132,7 @@ def main(argv):
 
 
     for j in range(1,num_ite+1):
-        ell = cf.direction(pde_params,semi.Yt,semi_diff, bound = bounds[j-1])
+        ell = cf.direction(pde_params,semi.Yt,semi_diff, bound = bound)
     
         for i in range(sim_params['num_time_intervals']):
             if i == 0:
@@ -134,7 +144,8 @@ def main(argv):
                                 'mean':t[:,0,0].mean().clone().detach().numpy().item(),
                                 'median':t[:,0,0].median().clone().detach().numpy().item(),
                                 'max':t[:,0,0].max().clone().detach().numpy().item(),
-                                'std':t[:,0,0].std().clone().detach().numpy().item()
+                                'std':t[:,0,0].std().clone().detach().numpy().item(),
+                                'bound':bound,
                                 }
         print(output_dict[j])
         
@@ -161,8 +172,7 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
         
-        ell = cf.direction(pde_params,semi.Yt,semi_diff, bound = bounds[j-1])
-    
+        bound = bound *   output_dict[j]['ell']['std']  
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 

@@ -181,19 +181,19 @@ class direction(coefficient):
                 self.bound = bound 
         else:
             self.bound = lambda x:2*torch.ones(x.shape[0],1)
-        if 'ChesneyScott' is kwargs:
+        if 'ChesneyScott' in kwargs:
             if kwargs['ChesneyScott']:
                 self.CS = True
                 self.Lb = lambda x: torch.pow(self.lb*x[:,1:],2).sum(axis=1)
-            else:
-                self.CS = False
-                self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0],1)
+        else:
+            self.CS = False
+            self.Lb = lambda x:  self.lb_norm.repeat(x.shape[0],1)
                         
         super(direction, self).__init__(params)
     def val(self,x):
         D2 = Grad_Hess(x,self.p)[1][:,1,1]
         D1 = Grad_Hess(x,self.p)[0][:,1]
-        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
+        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
     def __call__(self,x):
         A = torch.zeros(x.shape[0],self.dim,self.dim)
         A[:,0,0] = self.val(x)
