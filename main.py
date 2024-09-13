@@ -160,6 +160,7 @@ def main(argv):
                 t = sigma(semi.x[:,:,i]).squeeze(-1)
             else:
                 t = torch.cat((t,sigma(semi.x[:,:,i]).squeeze(-1)),axis=0)
+        print(t.shape)
         output_dict[j]['sigma'] = {'min':t[:,0,0].min().clone().detach().numpy().item(),
                                 'mean':t[:,0,0].mean().clone().detach().numpy().item(),
                                 'median':t[:,0,0].median().clone().detach().numpy().item(),
