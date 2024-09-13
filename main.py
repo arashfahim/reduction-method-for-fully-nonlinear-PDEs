@@ -88,7 +88,7 @@ def main(argv):
 
     m = cf.OU_drift_semi(pde_params) # type: ignore
     rand_diff = torch.tensor([1.7])
-    semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
+    semi_diff = cf.custom_diff_CS(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
     F = cf.f_driver(pde_params)
@@ -172,7 +172,7 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
         
-        bound = bound if j<=7 else 4. #output_dict[j]['ell']['std'] >= 1. else bound/2.
+        bound = torch.sgn(ell)
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 

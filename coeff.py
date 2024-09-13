@@ -21,37 +21,37 @@ class coefficient(object):
         self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
         self.params = params
     
-'''constant diffusion coefficient'''  
-class constant_diff(coefficient):
-    '''This class is a constant diffusion coefficient which is the optimal diffusion'''
-    def __init__(self,params,**kwargs):
-        super(constant_diff, self).__init__(params)
-        if kwargs:
-            if 'constant_diff' in kwargs.keys():
-                self.diff = kwargs['constant_diff']
-            else:
-                self.diff = torch.sqrt(torch.pow(self.lb,2).sum())/self.eta
-        else:
-            self.diff = torch.sqrt(torch.pow(self.lb,2).sum())/self.eta
-    def __call__(self,x):
-        tmp = x.shape[0]
-        return torch.diag(torch.cat((self.diff,self.nu[1:]),axis=0)).repeat(tmp,1,1)
+# '''constant diffusion coefficient'''  
+# class constant_diff(coefficient):
+#     '''This class is a constant diffusion coefficient which is the optimal diffusion'''
+#     def __init__(self,params,**kwargs):
+#         super(constant_diff, self).__init__(params)
+#         if kwargs:
+#             if 'constant_diff' in kwargs.keys():
+#                 self.diff = kwargs['constant_diff']
+#             else:
+#                 self.diff = torch.sqrt(torch.pow(self.lb,2).sum())/self.eta
+#         else:
+#             self.diff = torch.sqrt(torch.pow(self.lb,2).sum())/self.eta
+#     def __call__(self,x):
+#         tmp = x.shape[0]
+#         return torch.diag(torch.cat((self.diff,self.nu[1:]),axis=0)).repeat(tmp,1,1)
 
-'''Random diffusion coefficient for wealth process with diffusion of volatility processes all constant'''   
-class random_diff(coefficient):
-    def __init__(self,params):
-        super(random_diff, self).__init__(params)
-    def __call__(self,x):
-        tmp = x.shape[0]
-        return torch.diag(torch.cat((torch.rand(tmp,1),self.nu[1:].repeat(tmp,1)),axis=0))
+# '''Random diffusion coefficient for wealth process with diffusion of volatility processes all constant'''   
+# class random_diff(coefficient):
+#     def __init__(self,params):
+#         super(random_diff, self).__init__(params)
+#     def __call__(self,x):
+#         tmp = x.shape[0]
+#         return torch.diag(torch.cat((torch.rand(tmp,1),self.nu[1:].repeat(tmp,1)),axis=0))
     
 
     
 
 ''' diffusion'''
-class custom_diff(coefficient):
+class custom_diff_CS(coefficient):
     def __init__(self, params,s):
-        super(custom_diff, self).__init__(params)
+        super(custom_diff_CS, self).__init__(params)
         if torch.is_tensor(s):
             self.val = lambda x:s
         else:
@@ -66,6 +66,21 @@ class custom_diff(coefficient):
     def __add__(self, other):
         tmp = lambda x : self.val(x) + other.val(x)
         return custom_diff(self.params,tmp)
+    
+''' diffusion'''
+class custom_diff(coefficient):
+    def __init__(self, params,s):
+        super(custom_diff, self).__init__(params)
+        if torch.is_tensor(s):
+            self.val = lambda x: s.repeat([x.shape[0],self.dim,self.dim])
+        else:
+            self.val = s
+    def __call__(self, x):
+        return self.val(x)
+    def __add__(self, other):
+        tmp = lambda x : self.val(x) + other.val(x)
+        return custom_diff(self.params,tmp)
+    
     
     
 '''Zero drift coefficient for all components'''  
