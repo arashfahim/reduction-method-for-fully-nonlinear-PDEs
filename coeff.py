@@ -208,7 +208,7 @@ class direction(coefficient):
     def val(self,x):
         D2 = Grad_Hess(x,self.p)[1][:,1,1]
         D1 = Grad_Hess(x,self.p)[0][:,1]
-        return torch.sign(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)) 
+        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
     def __call__(self,x):
         A = torch.zeros(x.shape[0],self.dim,self.dim)
         A[:,0,0] = self.val(x)

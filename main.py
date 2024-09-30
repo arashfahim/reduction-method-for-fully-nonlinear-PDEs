@@ -59,7 +59,7 @@ def main(argv):
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
-    sim_params={'num_samples':2**15,
+    sim_params={'num_samples':2**9,
             'num_time_intervals': 10,
             'iid':iid,
             'start' : 0.9,  
