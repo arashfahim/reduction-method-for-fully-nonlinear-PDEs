@@ -88,7 +88,7 @@ def main(argv):
 
     m = cf.OU_drift_semi(pde_params) # type: ignore
     rand_diff = torch.tensor([1.7])
-    semi_diff = cf.custom_diff_CS(pde_params,rand_diff) # type: ignore
+    semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
     F = cf.f_driver(pde_params)
@@ -152,7 +152,7 @@ def main(argv):
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
             
-            
+        print(j,semi_diff.val(semi.x[:,:,0]).shape,ell.val(semi.x[:,:,0]).shape)    
         semi_diff = semi_diff + ell
         sigma = semi_diff
         for i in range(sim_params['num_time_intervals']):
@@ -160,7 +160,6 @@ def main(argv):
                 t = sigma(semi.x[:,:,i]).squeeze(-1)
             else:
                 t = torch.cat((t,sigma(semi.x[:,:,i]).squeeze(-1)),axis=0)
-        print(t.shape)
         output_dict[j]['sigma'] = {'min':t[:,0,0].min().clone().detach().numpy().item(),
                                 'mean':t[:,0,0].mean().clone().detach().numpy().item(),
                                 'median':t[:,0,0].median().clone().detach().numpy().item(),
@@ -173,7 +172,7 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
         
-        bound = torch.sgn(ell)
+        bound = 1.
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
