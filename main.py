@@ -59,7 +59,7 @@ def main(argv):
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
-    sim_params={'num_samples':2**9,
+    sim_params={'num_samples':2**10,
             'num_time_intervals': 10,
             'iid':iid,
             'start' : 0.9,  
@@ -67,7 +67,7 @@ def main(argv):
             'num_neurons':6
             }   
     
-    num_ite = 10
+    num_ite = 5
     bound = 8.# bounds
     
     path = os.path.dirname(__file__)
@@ -172,7 +172,7 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
         
-        bound = 1.
+        bound -= 1.
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
