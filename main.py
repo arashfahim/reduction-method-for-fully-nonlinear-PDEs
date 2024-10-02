@@ -27,7 +27,7 @@ import json
 
 
 
-           
+
 
 def main(argv):
     del argv
@@ -59,16 +59,16 @@ def main(argv):
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
-    sim_params={'num_samples':2**10,
-            'num_time_intervals': 10,
+    sim_params={'num_samples':2**12,
+            'num_time_intervals': 20,
             'iid':iid,
             'start' : 0.9,  
             'end' : 1.1,
             'num_neurons':6
             }   
     
-    num_ite = 6
-    bound = 4.# bounds
+    num_ite = 5
+    bound = 8.# bounds
     
     path = os.path.dirname(__file__)
     
@@ -87,7 +87,7 @@ def main(argv):
                                     }
 
     m = cf.OU_drift_semi(pde_params) # type: ignore
-    rand_diff = torch.tensor([1.7])
+    rand_diff = torch.tensor([0.7])
     semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
@@ -124,7 +124,7 @@ def main(argv):
                             }
     
     print("semi 1")
-    semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
+    semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
     
 
     with open(file+".json", "w") as outfile: 
@@ -147,12 +147,12 @@ def main(argv):
                                 'std':t[:,0,0].std().clone().detach().numpy().item(),
                                 'bound':bound,
                                 }
-        print(output_dict[j])
+        print('ell',output_dict[j]['ell'])
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
             
-        print(j,semi_diff.val(semi.x[:,:,0]).shape,ell.val(semi.x[:,:,0]).shape)    
+        # print(j,semi_diff.val(semi.x[:,:,0]).shape,ell.val(semi.x[:,:,0]).shape)    
         semi_diff = semi_diff + ell
         sigma = semi_diff
         for i in range(sim_params['num_time_intervals']):
@@ -166,11 +166,11 @@ def main(argv):
                                 'max':t[:,0,0].max().clone().detach().numpy().item(),
                                 'std':t[:,0,0].std().clone().detach().numpy().item()
                                 }
-        print(output_dict[j])
+        print('sigma',output_dict[j]['sigma'])
 
         semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
         print("semi "+str(j+1))
-        semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
+        semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
         
         bound -= 0.5
         bound =  np.maximum(bound,0.5)
