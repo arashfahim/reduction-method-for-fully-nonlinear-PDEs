@@ -67,7 +67,7 @@ def main(argv):
             'num_neurons':6
             }   
     
-    num_ite = 5
+    num_ite = 7
     bound = 8.# bounds
     
     path = os.path.dirname(__file__)
@@ -170,7 +170,7 @@ def main(argv):
 
         semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
         print("semi "+str(j+1))
-        semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
+        semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=10000)
         
         bound -= 0.5
         bound =  np.maximum(bound,0.5)
