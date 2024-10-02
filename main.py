@@ -67,8 +67,8 @@ def main(argv):
             'num_neurons':6
             }   
     
-    num_ite = 5
-    bound = 8.# bounds
+    num_ite = 6
+    bound = 4.# bounds
     
     path = os.path.dirname(__file__)
     
@@ -172,7 +172,8 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=2500)
         
-        bound -= 1.
+        bound -= 0.5
+        bound =  np.maximum(bound,0.5)
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
