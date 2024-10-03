@@ -109,7 +109,7 @@ class linear(parabolic):
         L1 = torch.pow(self.c[:,:,-1]-Y,2)
         L2 = torch.pow(self.Y0(self.x[:,1:,0])-self.Yt(self.x[:,:,0]),2)# Match with Y0
         L3 = torch.pow(self.c[:,:,-1]-self.Yt(self.x[:,:,-1]),2) # match with terminal
-        L = L1 + 4*(L2 + L3)
+        L = L1 + L2 + L3
         return L.mean()        
     
 class semilinear(parabolic):
@@ -139,5 +139,5 @@ class semilinear(parabolic):
         L1 = torch.pow(c[:,:,-1]-Y,2)
         L2 = torch.pow(self.Y0(self.x[:,1:,0])-self.Yt(self.x[:,:,0]),2)# Match with Y0
         L3 = torch.pow(c[:,:,-1]-self.Yt(self.x[:,:,-1]),2) # match with terminal
-        L = L1 + 4*(L2 + L3)
+        L = L1 + L2 + L3
         return L.mean()            

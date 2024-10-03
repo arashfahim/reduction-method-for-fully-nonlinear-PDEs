@@ -49,9 +49,9 @@ class coefficient(object):
     
 
 ''' diffusion'''
-class custom_diff_CS(coefficient):
+class custom_diff(coefficient):
     def __init__(self, params,s):
-        super(custom_diff_CS, self).__init__(params)
+        super(custom_diff, self).__init__(params)
         if torch.is_tensor(s):
             self.val = lambda x:s
         else:
@@ -68,18 +68,20 @@ class custom_diff_CS(coefficient):
         return custom_diff(self.params,tmp)
     
 ''' diffusion'''
-class custom_diff(coefficient):
-    def __init__(self, params,s):
-        super(custom_diff, self).__init__(params)
-        if torch.is_tensor(s):
-            self.val = lambda x: s.repeat([x.shape[0],self.dim,self.dim])
-        else:
-            self.val = s
-    def __call__(self, x):
-        return self.val(x)
-    def __add__(self, other):
-        tmp = lambda x : self.val(x) + other.val(x)
-        return custom_diff(self.params,tmp)
+# class custom_diff(coefficient):
+#     def __init__(self, params,s, **kwargs):
+#         super(custom_diff, self).__init__(params)
+#         if torch.is_tensor(s):
+#             self.val = lambda x: s.repeat(x.shape[0])# Shit!
+#         else:
+#             self.val = s
+        
+#     def __call__(self, x):
+        
+#         return self.val(x)
+#     def __add__(self, other):
+#         tmp = lambda x : self.val(x) + other.val(x)
+#         return custom_diff(self.params,tmp)
     
     
     
@@ -208,11 +210,11 @@ class direction(coefficient):
     def val(self,x):
         D2 = Grad_Hess(x,self.p)[1][:,1,1]
         D1 = Grad_Hess(x,self.p)[0][:,1]
-        A = torch.zeros(x.shape[0],self.dim,self.dim)
-        A[:,0,0] = torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
-        return A
+        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
     def __call__(self,x):
-        return self.val(x)
+        A = torch.zeros(x.shape[0],self.dim,self.dim)
+        A[:,0,0] = self.val(x)
+        return A        
     def __mul__(self, magnitude):
         return direction(self.params,self.p,self.sigma,magnitude=magnitude,bound=self.bound,ChesneyScott=self.CS)
     def __rmul__(self, magnitude):
