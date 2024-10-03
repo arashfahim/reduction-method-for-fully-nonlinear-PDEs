@@ -68,7 +68,7 @@ def main(argv):
             }   
     
     num_ite = 5
-    bound = .5# bounds
+    bound = 4.# bounds
     
     path = os.path.dirname(__file__)
     
