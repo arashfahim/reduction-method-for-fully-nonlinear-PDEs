@@ -23,6 +23,8 @@ from absl import app # type: ignore
 import pickle as pk
 import os
 import json
+from pathlib import Path
+import sys
 
 
 
@@ -70,7 +72,10 @@ def main(argv):
     num_ite = 5
     bound = 4.# bounds
     
-    path = os.path.dirname(__file__)
+    path = Path(os.path.dirname(__file__))
+    print(path.parent.absolute())
+    import sys
+    sys.exit("Error message")
     
     timestr = time.strftime("%Y%m%d-%H%M")
     file = os.path.join(path,"iterations_1e-1_ell_only_"+timestr)

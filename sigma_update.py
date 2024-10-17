@@ -9,7 +9,7 @@ from neuralnets import sigmanet
 
 # the sigma update helps memory useage stay constant at the cost of time
 
-class sigma_update(object):
+class fussion(object):
     def __init__(self, pde, sim, data, sigma_dir) -> None:
         # self.sigma = sigma_dir
         self.dim = pde['dim']
