@@ -61,12 +61,12 @@ def main(argv):
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
-    sim_params={'num_samples':2**14,
+    sim_params={'num_samples':2**10,
             'num_time_intervals': 20,
             'iid':iid,
             'start' : 0.9,  
             'end' : 1.1,
-            'num_neurons':6
+            'num_neurons':4
             }   
     
     num_ite = 5
