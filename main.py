@@ -48,20 +48,20 @@ def main(argv):
             'kappa':[0.,1.,0.8,0.6,0.4,0.5,0.3,0.2,0.1,0.7], # The first kappa=0 because the drift of wealth process is zero
             'theta':[0.,0.4,0.2,0.3,0.4,0.5,0.4,0.3,0.2,0.1],
             'nu':[0.,0.2,0.15,0.11,0.12,0.1,0.13,0.14,0.14,0.1], # GPW
-            'lb':[0.,1.5,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # GPW
+            'lb':[0.,1.1,1.11,0.12,0.13,0.15,0.11,0.12,0.13,0.15], # GPW
             'rho':[0.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-            'eta':.5,
+            'eta':.9,
             'T': 1.,
             }
     t0 = time.time()
-    num_samples = 2**15
+    num_samples = 2**20
     num_time_intervals = 20
     max_dim = 10
     size = num_samples* max_dim * num_time_intervals
     iid = torch.randn(size=[size]).to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
-    sim_params={'num_samples':2**10,
+    sim_params={'num_samples':2**14,
             'num_time_intervals': 20,
             'iid':iid,
             'start' : 0.9,  
@@ -70,15 +70,13 @@ def main(argv):
             }   
     
     num_ite = 5
-    bound = 4.# bounds
+    bound = 1.# bounds
     
-    path = Path(os.path.dirname(__file__))
-    print(path.parent.absolute())
-    import sys
-    sys.exit("Error message")
+    path_ = Path(os.path.dirname(__file__))
+    path = str(path_.parent.absolute())+"/reduction_results"
     
     timestr = time.strftime("%Y%m%d-%H%M")
-    file = os.path.join(path,"iterations_1e-1_ell_only_"+timestr)
+    file = os.path.join(path,"dim_"+str(pde_params['dim'])+"_"+timestr)
     output_dict = {}
     
     output_dict['pde'] = pde_params
@@ -92,12 +90,13 @@ def main(argv):
                                     }
 
     m = cf.OU_drift_semi(pde_params) # type: ignore
-    rand_diff = torch.tensor([3.5])
+    rand_diff = torch.tensor([1.0])
     semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
     F = cf.f_driver(pde_params)
     
+
 
     output_dict['optimal'] = (m.lb_norm/m.eta).item()
     
@@ -105,7 +104,7 @@ def main(argv):
     
     
     semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params) # type: ignore
-
+   
     
     sigma = semi_diff
     for i in range(sim_params['num_time_intervals']):
@@ -127,6 +126,8 @@ def main(argv):
                             'max':t[:,0,0].max().clone().detach().numpy().item(),
                             'std':t[:,0,0].std().clone().detach().numpy().item()
                             }
+    
+    # sys.exit("{}".format(t))
     
     print("semi 1")
     semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
@@ -177,8 +178,8 @@ def main(argv):
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=7000)
         
-        bound -= 0.5
-        bound =  np.maximum(bound,0.5)
+        bound -= 0.2
+        bound =  np.maximum(bound,0.1)
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 

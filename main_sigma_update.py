@@ -62,10 +62,11 @@ def main(argv):
     num_ite = 10
     bounds = [.5 for n in range(num_ite+1)]# bounds
     
-    path = os.path.dirname(__file__)
+    path_ = Path(os.path.dirname(__file__))
+    path = str(path_.parent.absolute())+"/reduction_results"
     
     timestr = time.strftime("%Y%m%d-%H%M")
-    file = os.path.join(path,"ite_"+str(pde_params['dim'])+"_"+str(bounds[0])+"_"+timestr)
+    file = os.path.join(path,"fuse_dim_"+str(pde_params['dim'])+"_"+timestr)
     output_dict = {}
     
     output_dict['pde'] = pde_params
