@@ -5,9 +5,7 @@ import numpy as np
 from derivation import Grad, Grad_Hess
 from neuralnets import sigmanet
 from time import time
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def Frobenius(A,B):
     return torch.vmap(torch.trace)(torch.bmm(A,torch.transpose(B,1,2)))
@@ -17,12 +15,12 @@ def Frobenius(A,B):
 '''Implements the coefficients based on the parameters '''
 class coefficient(object):
     def __init__(self,params): #### out_shape =([M]) |  input:  x_shape=[M,D,1],  z shape = [M,D,1],a_shape= [M,D,D]  #This is for rho=0
-        self.dim = torch.tensor(params['dim']).clone().detach().to(device)#2
-        self.nu = torch.tensor(params['nu'][0:self.dim]).clone().detach().to(device)
-        self.kappa = torch.tensor(params['kappa'][0:self.dim]).clone().detach().to(device)
-        self.theta = torch.tensor(params['theta'][0:self.dim]).clone().detach().to(device)
-        self.eta = torch.tensor(params['eta']).clone().detach().to(device)
-        self.lb = torch.tensor(params['lb'][0:self.dim]).clone().detach().to(device)
+        self.dim = torch.tensor(params['dim']).clone().detach()#.to(device)#2
+        self.nu = torch.tensor(params['nu'][0:self.dim]).clone().detach()#.to(device)
+        self.kappa = torch.tensor(params['kappa'][0:self.dim]).clone().detach()#.to(device)
+        self.theta = torch.tensor(params['theta'][0:self.dim]).clone().detach()#.to(device)
+        self.eta = torch.tensor(params['eta']).clone().detach()#.to(device)
+        self.lb = torch.tensor(params['lb'][0:self.dim]).clone().detach()#.to(device)
         self.lb_norm = torch.sqrt(torch.pow(self.lb,2).sum())
         self.params = params
     
@@ -213,8 +211,7 @@ class direction(coefficient):
     def val(self,x):
         D2 = Grad_Hess(x,self.p)[1][:,1,1]
         D1 = Grad_Hess(x,self.p)[0][:,1]
-        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.lb_norm*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), torch.zeros(x.shape[0])) 
-    #torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
+        return torch.maximum(torch.minimum(self.magnitude(x).squeeze(-1)*(self.Lb(x)*torch.abs(D1.squeeze(-1))+self.sigma(x)[:,0,0]*D2),self.bound(x).squeeze(-1)), -self.bound(x).squeeze(-1)) 
     def __call__(self,x):
         A = torch.zeros(x.shape[0],self.dim,self.dim)
         A[:,0,0] = self.val(x)

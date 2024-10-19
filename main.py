@@ -3,7 +3,7 @@ import torch # type: ignore
 import torch.nn as nn # type: ignore
 import torch.optim as optim # type: ignore
 torch.set_default_dtype(torch.float64)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 import time
 # from IPython.display import display, Markdown
@@ -58,7 +58,7 @@ def main(argv):
     num_time_intervals = 20
     max_dim = 10
     size = num_samples* max_dim * num_time_intervals
-    iid = torch.randn(size=[size]).to(device)
+    iid = torch.randn(size=[size])#.to(device)
     print("It takes {:.0f} ms to generate {:,} iid samples.".format(round(1000*(time.time()-t0),6),size))
 
     sim_params={'num_samples':2**10,
@@ -66,7 +66,7 @@ def main(argv):
             'iid':iid,
             'start' : 0.9,  
             'end' : 1.1,
-            'num_neurons':4
+            'num_neurons':6
             }   
     
     num_ite = 5

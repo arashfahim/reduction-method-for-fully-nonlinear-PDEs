@@ -1,10 +1,10 @@
 import torch
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def Grad(x,v): #output= [M,D,D], #input: x=[M,D], t=[M,1], xt= [M,D+1]
     d = x.shape[1]
-    Du=torch.zeros(x.shape[0],d).to(device)
+    Du=torch.zeros(x.shape[0],d)#.to(device)
     xin=x.clone().detach()
     xin.requires_grad=True
     u=v(xin)
@@ -15,8 +15,8 @@ def Grad(x,v): #output= [M,D,D], #input: x=[M,D], t=[M,1], xt= [M,D+1]
 
 def Grad_Hess(x,v): #output= [M,D,D], #input: x=[M,D], t=[M,1], xt= [M,D+1]
     d = x.shape[1]
-    hess_temp=torch.zeros(x.shape[0],d,d).to(device)
-    Du=torch.zeros(x.shape[0],d).to(device)
+    hess_temp=torch.zeros(x.shape[0],d,d)#.to(device)
+    Du=torch.zeros(x.shape[0],d)#.to(device)
     xin=x.clone().detach()
     xin.requires_grad=True
     u=v(xin)

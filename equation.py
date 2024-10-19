@@ -4,7 +4,7 @@ import numpy as np
 import torch.optim as optim
 import time
 torch.set_default_dtype(torch.float64)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # from IPython.display import display, Markdown
@@ -35,10 +35,10 @@ class parabolic(object):
         self.dim = pde['dim']
         self.num_samples = sim['num_samples']
         data = data_gen(sigma,mu,pde,sim)
-        self.dt = data.dt.to(device)
-        self.x = data.x.to(device).clone().detach()
-        self.sigmadw = data.sigmadw.to(device).clone().detach()
-        self.r = torch.ones((self.x.shape[0],1,self.n+1)).to(device)
+        self.dt = data.dt#.to(device)
+        self.x = data.x.clone().detach()#.to(device)
+        self.sigmadw = data.sigmadw.clone().detach()#.to(device)
+        self.r = torch.ones((self.x.shape[0],1,self.n+1))#.to(device)
         for i in range(self.n):
             self.r[:,:,i+1] = self.r[:,:,i]* torch.exp(-self.kappa(self.x[:,:,i])*self.dt)
         self.r = self.r.clone().detach()
@@ -89,7 +89,7 @@ class linear(parabolic):
     def __init__(self, sigma, mu, source, kappa, terminal, pde, sim):
         self.source = source # source term for the PDE
         super().__init__(sigma, mu, kappa, terminal, pde, sim)  
-        self.c = torch.ones((self.x.shape[0],1,self.n+1)).to(device)
+        self.c = torch.ones((self.x.shape[0],1,self.n+1))#.to(device)
         for i in range(self.n):
             if i == self.n -1 :
                 self.c[:,:,i+1] = self.terminal(self.x[:,1:,i+1])
@@ -116,14 +116,14 @@ class semilinear(parabolic):
     def __init__(self,sigma, mu, driver, kappa, terminal, pde, sim):
         self.F = driver    
         super(semilinear,self).__init__(sigma, mu, kappa, terminal, pde, sim)   
-        self.sigmax = torch.ones((self.x.shape[0],self.dim,self.dim,self.n)).to(device)
+        self.sigmax = torch.ones((self.x.shape[0],self.dim,self.dim,self.n))#.to(device)
         for i in range(self.n):
             #evaluate and reuse self.sigma(self.x[:,:,i]).reshape((self.num_samples,self.dim,self.dim))[:,0,0] 
             self.sigmax[:,:,:,i] = self.sigma(self.x[:,:,i]).reshape((self.num_samples,self.dim,self.dim))
         self.sigmax = self.sigmax.clone().detach()
         
     def loss(self):
-        c = torch.zeros((self.num_samples,1,self.n+1)).to(device)
+        c = torch.zeros((self.num_samples,1,self.n+1))#.to(device)
         for i in range(self.n):   
             if i == 0:
                 Y =  self.Y0(self.x[:,1:,0])

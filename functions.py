@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 '''Class to create functions which take parameters from a dictionary'''
 class solution(object):
@@ -20,21 +20,21 @@ class exp_solution(solution):
         super(exp_solution, self).__init__(params)
     def __call__(self,x):
         # print(self.alpha)
-        return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.alpha*(self.T-x[:,0])).to(device)     
+        return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.alpha*(self.T-x[:,0]))#.to(device)     
 
 class zero_solution(solution):
     def __init__(self,params):
         super(zero_solution, self).__init__(params)
     def __call__(self,x):
         # print(self.alpha)
-        return torch.zeros([x.shape[0],1]).to(device) 
+        return torch.zeros([x.shape[0],1])#.to(device) 
     
 class time_solution(solution):
     def __init__(self,params,constant):
         self.constant = constant
         super(time_solution, self).__init__(params)  
     def __call__(self,x):
-        return (self.T-x[:,0].unsqueeze(-1))*self.constant*torch.ones([x.shape[0],1]).to(device)    
+        return (self.T-x[:,0].unsqueeze(-1))*self.constant*torch.ones([x.shape[0],1])#.to(device)    
     
     
 class ChesneyScott(solution):
@@ -65,4 +65,4 @@ class ChesneyScott(solution):
             # print(tmp,phi,psi,chi,-0.5*torch.pow(self.lb[i],2)*(self.T-x[:,0]))
         return tmp
     def __call__(self,x):
-        return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.wtv(x)).to(device)     
+        return torch.tensor([1.])-torch.exp(-self.eta*x[:,1]+self.wtv(x))#.to(device)     

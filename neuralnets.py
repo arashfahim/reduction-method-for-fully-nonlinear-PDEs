@@ -1,6 +1,6 @@
 import torch # type: ignore
 import torch.nn as nn # type: ignore
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Solution at t=0
