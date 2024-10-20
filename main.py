@@ -69,7 +69,7 @@ def main(argv):
             'num_neurons':4
             }   
     
-    num_ite = 1
+    num_ite = 4
     bound = 1.# bounds
     
     path_ = Path(os.path.dirname(__file__))
@@ -132,7 +132,7 @@ def main(argv):
     
     print("semi 1")
     semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
-    sys.exit("{}".format(t))
+    # sys.exit("{}".format(t))
 
 
     with open(file+".json", "w") as outfile: 
