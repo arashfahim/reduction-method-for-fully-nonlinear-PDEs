@@ -66,10 +66,10 @@ def main(argv):
             'iid':iid,
             'start' : 0.9,  
             'end' : 1.1,
-            'num_neurons':6
+            'num_neurons':4
             }   
     
-    num_ite = 5
+    num_ite = 1
     bound = 1.# bounds
     
     path_ = Path(os.path.dirname(__file__))
@@ -112,6 +112,7 @@ def main(argv):
             t = sigma(semi.x[:,:,i]).squeeze(-1)
         else:
             t = torch.cat((t,sigma(semi.x[:,:,i]).squeeze(-1)),axis=0)
+    # print(t)
     output_dict[0] = {}
     output_dict[0]['ell'] = {'min':0.,
                             'mean':0.,
@@ -131,7 +132,8 @@ def main(argv):
     
     print("semi 1")
     semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=5000)
-    
+    sys.exit("{}".format(t))
+
 
     with open(file+".json", "w") as outfile: 
         json.dump(output_dict, outfile) 
