@@ -70,7 +70,7 @@ def main(argv):
             }   
     
     num_ite = 4
-    bound = 1.# bounds
+    bound = 4.# bounds
     
     path_ = Path(os.path.dirname(__file__))
     path = str(path_.parent.absolute())+"/reduction_results"
