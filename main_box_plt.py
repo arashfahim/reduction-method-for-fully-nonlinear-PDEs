@@ -1,4 +1,5 @@
 import numpy as np # type: ignore
+import pandas as pd
 import torch # type: ignore
 import torch.nn as nn # type: ignore
 import torch.optim as optim # type: ignore
@@ -66,11 +67,11 @@ def main(argv):
             'iid':iid,
             'start' : 0.9,  
             'end' : 1.1,
-            'num_neurons':4
+            'num_neurons':12
             }   
     
-    num_ite = 4
-    bound = 8.# bounds
+    num_ite = 1
+    bound = 1.# bounds
     
     path_ = Path(os.path.dirname(__file__))
     path = str(path_.parent.absolute())+"/reduction_results"
@@ -78,6 +79,7 @@ def main(argv):
     timestr = time.strftime("%Y%m%d-%H%M")
     file = os.path.join(path,"dim_"+str(pde_params['dim'])+"_"+timestr)
     output_dict = {}
+    df = pd.DataFrame(columns=['ite'+str(n) for n in range(1,num_ite+1)])
     
     output_dict['pde'] = pde_params
     
@@ -90,7 +92,7 @@ def main(argv):
                                     }
 
     m = cf.OU_drift_semi(pde_params) # type: ignore
-    rand_diff = torch.tensor([1.1/0.9])
+    rand_diff = torch.tensor([0.5])
     semi_diff = cf.custom_diff(pde_params,rand_diff) # type: ignore
     k = cf.zero_discount(pde_params)
     g = cf.exponential_terminal(pde_params)
@@ -127,6 +129,8 @@ def main(argv):
                             'max':t[:,0,0].max().clone().detach().numpy().item(),
                             'std':t[:,0,0].std().clone().detach().numpy().item()
                             }
+    
+    df['ite1'] = t[:,0,0].clone().detach().numpy()
     
     # sys.exit("{}".format(t))
     
@@ -175,16 +179,19 @@ def main(argv):
                                 'std':t[:,0,0].std().clone().detach().numpy().item()
                                 }
         print('sigma',output_dict[j]['sigma'])
+        df["ite"+str(j+1)] = t[:,0,0].clone().detach().numpy()
 
         semi = eqn.semilinear(semi_diff,m,F,k,g,pde_params,sim_params)
         print("semi "+str(j+1))
         semi.train(lr=1e-2,delta_loss=1e-10,max_num_epochs=7000)
         
-        bound -= 0.2
+        bound -= 0.25
         bound =  np.maximum(bound,0.1)
         
         with open(file+".json", "w") as outfile: 
             json.dump(output_dict, outfile) 
+            
+    df.to_csv(file+".csv",index=False)
 
         
 
