@@ -1,10 +1,10 @@
 cff-version: 0.0.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: "Duong”
-    given-names: “Hung”
-  - family-names: “Fahim”
-    given-names: “Arash”
+  - family-names: "Duong"
+    given-names: "Hung"
+  - family-names: "Fahim"
+    given-names: "Arash"
     orcid: "https://orcid.org/0009-0005-7737-9375"
 title: "Reduction Method for Fully Nonlinear PDEs"
 version: "0.0.0"
